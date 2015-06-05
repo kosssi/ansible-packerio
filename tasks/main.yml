@@ -68,17 +68,23 @@
     mode=0755
     dest={{ packerio_install_dir }}/{{ packerio_version }}
 
+- name: Check if path exists
+  stat: path={{ packerio_install_dir }}/{{ packerio_version }}
+  register: check_path
+
 - name: Install packer
   tags: packerio
   sudo: yes
   unarchive:
     src={{ local_ansible_data_path }}/{{ packerio_filename }}
     dest={{ packerio_install_dir }}/{{ packerio_version }}
+  when: check_path.stat.exists == false
 
 - name: Gathering installed binaries
   tags: packerio
   register: packerio_installed_binaries
   shell: ls -1 {{ packerio_install_dir }}/{{ packerio_version }}/packer*
+  changed_when: false
 
 - name: Linking binaries into system PATH
   tags: packerio
